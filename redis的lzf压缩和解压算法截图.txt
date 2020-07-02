@@ -70,7 +70,31 @@
   最后2个字节直接拼接到op里面。
   
   #########实例#########
-  输入待压缩内容：helloxhelloyhellofancie（这里重复的内容是3个hello，总共23个字节）
+  输入待压缩内容：helloworldxhelloworldyhelloworldfancie（这里重复的内容是3个helloworld，总共38个字节）
   
+  我们观察一下op里面的内容
+  开始空一个字节，这时：
+  op = 0
+  继续读取6个字节
+  op = 0 h e l l o w o r l d x（中间的空格便于观察）
+  读取到第12个字节的时候，发现有相同的内容（这里我把官方代码：&& ref > (u8 *)in_data 的 ">" 修改成了 “>=”）
+  记录读取内容
+  op = 10 h e l l o w o r l d x 
+  记录偏移距离和重复长度
+  op = 10 h e l l o w o r l d x 224 1 10
+  继续空一个字节
+  op = 10 h e l l o w o r l d x 224 1 10 0
+  继续读取y
+  op = 10 h e l l o w o r l d x 224 1 10 0 y （y前面一个0不需要修改成1，因为解压会做一次++）
+  继续读取又碰到重复的内容
+  op = 10 h e l l o w o r l d x 224 1 10 0 y 224 1 10
+  继续空一个字节
+  op = 10 h e l l o w o r l d x 224 1 10 0 y 224 1 10 0
+  继续读取后面的fancie
+  op = 10 h e l l o w o r l d x 224 1 10 0 y 224 1 10 0 f a n c i e
+  记录最后一次读取长度
+  op = 10 h e l l o w o r l d x 224 1 10 0 y 224 1 10 5 f a n c i e
+  ####压缩到此结束
+  整个字符串压缩到27个字节
   
   **********解压**********
