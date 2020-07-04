@@ -1,3 +1,6 @@
+以下内容基于redis3.0
+----------------------------------------------
+
 redis所有事件处理都是在这里：
 ae.c文件的：int aeProcessEvents(aeEventLoop *eventLoop, int flags)
 常用的get，set等都是在这里处理的，telnet也不例外
