@@ -1,5 +1,17 @@
 以下内容基于redis3.0
 ----------------------------------------------
+redis的save指令是把当前内存的内容以一定的格式写入文件，redis可以通过load文件重新读取内容加载到内存，不至于数据丢失，save指令是阻塞的（我们可以通过测试发现save不执行完，其他指令例如get是无法执行的），
+相对save的还有bgsave指令，后期我也将介绍bgsave指令是怎么执行的。
+
+save指令实行的是以下方法：
+/* Save the DB on disk. Return REDIS_ERR on error, REDIS_OK on success 
+ *
+ * 将数据库保存到磁盘上。
+ *
+ * 保存成功返回 REDIS_OK ，出错/失败返回 REDIS_ERR 。
+ */
+int rdbSave(char *filename)
+
 
 
 -------------------------------------------------------------
