@@ -19,7 +19,9 @@ redis的get指令大致分为三个步骤（不计算执行之前之前或者执
  * 读取客户端的查询缓冲区内容
  */
 void readQueryFromClient(aeEventLoop *el, int fd, void *privdata, int mask)
+```
 2）根据读取的内容查找具体应该执行什么方法
+```c
 /*
  * 根据给定命令名字（SDS），查找命令
  */
@@ -37,11 +39,10 @@ redis.h定义的：dict *commands
 typedef struct dictEntry {....}
 ```
 再从dictEntry解析出具体的value，就是命令相关内容，这些命令实际上是redis初始化的时候写入dict中，数据来源如下：
-
+```c
 redis.c顶部的：struct redisCommand redisCommandTable[] = {....}
-
 redisCommandTable记录所有当前redis所能执行的所有指令。
-
+```
 读取指令之后赋值到redisClient的cmd中。
 
 具体怎么通过“get”获得哪个dictEntry在第二个步骤再讲，处理方式跟get指令通过key获取value的方式一致。
@@ -87,12 +88,12 @@ dictEntry *dictFind(dict *d, const void *key)
 
 首先对key进行hash，这跟java语言的map是类似的（本人写java的），dict是用hash+链表存储数据。
 
-具体的计算hash值方法在这里，有兴趣的读者自行研究（多说一句：一个优秀的hash函数需要尽可能均匀分布在某个区间里面，如果一个hash函数计算出来的结果大多相同，这样会导致dict的链表很长，链表需要一个一个查找比对，执行效率比较低）：
+具体的计算hash值方法读者可以参考<<第六篇：redis的通用HASH函数算法解析>>（多说一句：一个优秀的hash函数需要尽可能均匀分布在某个区间里面，如果一个hash函数计算出来的结果大多相同，这样会导致dict的链表很长，链表需要一个一个查找比对，执行效率比较低）：
 ```c
 unsigned int dictGenHashFunction(const void *key, int len)
 ```
 
-计算出hash值之后再在dich的table里面看这个位置有没有值，如果有值那这个位置上个链表结构，然后一个个的用key比对：
+计算出hash值之后再在dict的table里面看这个位置有没有值，如果有值那这个位置上个链表结构，然后一个个的用key比对：
 ```c
 // 计算索引值
 idx = h & d->ht[table].sizemask;
@@ -126,7 +127,7 @@ wfileProc具体执行的是：
 void sendReplyToClient(aeEventLoop *el, int fd, void *privdata, int mask) 
 ```
 
-写入内容到套接字，这个跟我们大学时候学的聊天系统客户端与服务器互相发消息类似
+写入内容到套接字，这个跟我们大学时候学的聊天系统客户端与服务器通信，互相发消息类似。
 ```c
 // c->sentlen 是用来处理 short write 的
 // 当出现 short write ，导致写入未能一次完成时，
