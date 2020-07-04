@@ -27,8 +27,10 @@ aeApiPoll获得是TCP连接还是TCP6连接。
 ```c
 // 从已就绪数组中获取事件
 aeFileEvent *fe = &eventLoop->events[eventLoop->fired[j].fd];
-//eventLoop->events  里面有2个文件事件，这是redis启动的时候注册的，具体在：
-redis.c的listenToPort(server.port,server.ipfd,&server.ipfd_count)
+```
+eventLoop->events  里面有2个文件事件，这是redis启动的时候注册的，具体在：
+```c
+redis.c的listenToPort(server.port,server.ipfd,&server.ipfd_count){....}
 ```
 listenToPort注册2个文件事件，一个是TCP，另外一个是TCP6
 ```c
@@ -45,7 +47,7 @@ if (fds[*count] != ANET_ERR) {
     (*count)++;
 }
 ```
-文件事件有2个事件处理器
+文件事件有2个事件处理器，一个用于读，一个用于写。
 ```c
 // 读事件处理器
 aeFileProc *rfileProc;
@@ -56,7 +58,7 @@ telnet的rfileProc执行：
 ```c
 void acceptTcpHandler(aeEventLoop *el, int fd, void *privdata, int mask)
 ```
-acceptTcpHandler方法的最后创建一个redisClient，后续命令，例如get，set命令都是由redisClient负责处理，每一个新的连接都创建一个redisClient。
+acceptTcpHandler方法的最后创建一个redisClient，后续命令例如get，set命令都是由redisClient负责处理，每一个新的连接都创建一个redisClient。
 
 telnet命令不需要执行wfileProc事件。
 
