@@ -201,6 +201,25 @@ redis支持多种数据结构，除了REDIS_STRING之外还有：REDIS_LIST，RE
 
 其他数据的写入有些额外的处理，但是基本上最终都是调用基本数据类型写入的，例如字符串、int、double类型的格式写入的，这里就不分解描述了。
 
+附加说明（校验函数）
+----------------
+如果启用校验功能，校验函数是在每次调用“rioWrite”的时候计算。
+```c
+static inline size_t rioWrite(rio *r, const void *buf, size_t len){...}
+```
+校验函数本身也比较简单，就是对传入上一次结果、本次数据的内容、本次数据的字节长度，然后循环进行查表操作、位移操作、按位异或操作，大家可以看看代码，crc64_tab实际上就是一个数组，里面包含256个8字节长度的数据。
+```c
+uint64_t crc64(uint64_t crc, const unsigned char *s, uint64_t l) {
+    uint64_t j;
+
+    for (j = 0; j < l; j++) {
+        uint8_t byte = s[j];
+        crc = crc64_tab[(uint8_t)crc ^ byte] ^ (crc >> 8);
+    }
+    return crc;
+}
+```
+
 -------------------------------------------------------------
 2020年7月4日整理于杭州
 
