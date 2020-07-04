@@ -43,12 +43,12 @@ aeFileProc *wfileProc;
 
 telnet的rfileProc执行：
 void acceptTcpHandler(aeEventLoop *el, int fd, void *privdata, int mask)
-acceptTcpHandler方法的最后创建一个redisClient，后续命令，例如get，set都是由redisClient负责处理，每一个新的连接都创建一个redisClient。
+acceptTcpHandler方法的最后创建一个redisClient，后续命令，例如get，set命令都是由redisClient负责处理，每一个新的连接都创建一个redisClient。
 
 telnet命令不需要执行wfileProc事件。
 
 至此telnet命令执行完（后面的是与时间事件记录相关）
 
 -------------------------------------------------------------
-2020年7月24日整理于杭州
+2020年7月4日整理于杭州
 --fancie
