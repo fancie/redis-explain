@@ -2,12 +2,17 @@
 ----------------------------------------------
 
 redis的get指令大致分为三个步骤（不计算执行之前之前或者执行之后redis的事项以及集群相关的内容）
+
   第一步：获得指令数据查找具体指令执行的方法并检查指令参数是不是正确以及认证信息，服务器状态等
+
   第二步：用key查找具体的value，这里分为2个子项：查找是否过期，查找具体的value
+
   第三步：把结果返回给客户端
   
 ###################华丽的分界线#######################################
+
 第一步：获得指令数据查找具体指令执行的方法
+
 1）读取客户端的指令内容在networking.c里面
 ```c
 /*
@@ -31,8 +36,8 @@ dict存放的是：dictEntry
  */
 typedef struct dictEntry {....}
 ```
-再从dictEntry解析出具体的value，就是命令相关内容，这些命令实际上是redis初始化的时候写入dict中，数据来源如下：
-redis.c顶部的：struct redisCommand redisCommandTable[] = {....}
+再从dictEntry解析出具体的value，就是命令相关内容，这些命令实际上是redis初始化的时候写入dict中，数据来源如下：\<br>
+redis.c顶部的：struct redisCommand redisCommandTable[] = {....}\<br>
 redisCommandTable记录所有当前redis所能执行的所有指令。
 读取指令之后赋值到redisClient的cmd中。
 具体怎么通过“get”获得哪个dictEntry在第二个步骤再讲，处理方式跟get指令通过key获取value的方式一致。
