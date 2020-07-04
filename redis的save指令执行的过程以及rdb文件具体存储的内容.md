@@ -75,7 +75,7 @@ if (rdbSaveType(&rdb,REDIS_RDB_OPCODE_SELECTDB) == -1) goto werr;
 
   最前面的0表示数据类型，这是表示value的类型为“REDIS_RDB_TYPE_STRING”类型，它与内存数据的类型“REDIS_STRING”相对应。
   
-  003表示接下来的（k，v）的key需要读取3个字节。
+  003 表示接下来的（k，v）的key需要读取3个字节。
   
   k e y：表示（k，v）的k的具体值。
   
@@ -111,6 +111,42 @@ expire = getExpire(db,&key);
 // 保存键值对数据
 if (rdbSaveKeyValuePair(&rdb,&key,o,expire,now) == -1) goto werr;
 ```
+save指令不保存过期的，所以先检查过期时间
+
+具体保存key，value的部分在“rdbSaveKeyValuePair”方法里面，接下来我们看“rdbSaveKeyValuePair”这个方法。
+
+核心代码在这里
+```c
+/* Save type, key, value 
+*
+* 保存类型，键，值
+*/
+if (rdbSaveObjectType(rdb,val) == -1) return -1;
+if (rdbSaveStringObject(rdb,key) == -1) return -1;
+if (rdbSaveObject(rdb,val) == -1) return -1;
+```
+从代码我们可以看到首先保存value的类型，再保存string类型的key，最后保存value对象。
+
+rdbSaveObjectType方法比较简单，就是od指令里面“003”前面的数字，每个数字代表一种类型。
+
+本次我们只解析string类型的内容如何保存到rdb中，所以保存key和value使用的是同样的方法。
+```c
+/* Save a string object as [len][data] on disk. If the object is a string
+ * representation of an integer value we try to save it in a special form 
+ *
+ * 以 [len][data] 的形式将字符串对象写入到 rdb 中。
+ *
+ * 如果对象是字符串表示的整数值，那么程序尝试以特殊的形式来保存它。
+ *
+ * 函数返回保存字符串所需的空间字节数。
+ */
+int rdbSaveRawString(rio *rdb, unsigned char *s, size_t len){
+    //方法体
+}
+```
+正如注释中写的string内容的数据是以 【len】【data】 的格式将字符串对象写入到 rdb 中。
+
+这跟我们用od命令观察的结果是一样的，比如：003 k e y 005 v a l u e。
 
 
 -------------------------------------------------------------
