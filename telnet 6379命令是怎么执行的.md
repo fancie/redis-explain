@@ -27,11 +27,11 @@ aeApiPoll获得是TCP连接还是TCP6连接。
 ```c
 // 从已就绪数组中获取事件
 aeFileEvent *fe = &eventLoop->events[eventLoop->fired[j].fd];
-
-eventLoop->events里面有2个文件事件，这是redis启动的时候注册的，具体在：
+//eventLoop->events  里面有2个文件事件，这是redis启动的时候注册的，具体在：
 redis.c的listenToPort(server.port,server.ipfd,&server.ipfd_count)
-
+```
 listenToPort注册2个文件事件，一个是TCP，另外一个是TCP6
+```c
 fds[*count] = anetTcp6Server(server.neterr,port,NULL,
     server.tcp_backlog);
 if (fds[*count] != ANET_ERR) {
