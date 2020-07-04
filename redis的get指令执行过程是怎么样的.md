@@ -30,7 +30,7 @@ struct redisCommand *lookupCommand(sds name)
 ```c
 // 命令表
 redis.h定义的：dict *commands
-dict存放的是：dictEntry
+//dict存放的是：dictEntry
 /*
  * 哈希表节点
  */
@@ -54,7 +54,7 @@ redisCommandTable记录所有当前redis所能执行的所有指令。
 // 调用命令的实现函数，执行命令
 void call(redisClient *c, int flags)
 
-具体执行的是cmd的proc，proc是在第一步查找之后赋值的
+//具体执行的是cmd的proc，proc是在第一步查找之后赋值的
 // 执行实现函数
 c->cmd->proc(c);
 ```
@@ -63,9 +63,9 @@ c->cmd->proc(c);
 ```c
 // 查找
 robj *o = lookupKeyRead(c->db, key)
-先检查过期时间
+//先检查过期时间
 expireIfNeeded(db,key);
-再从数据库中取出键的值
+//再从数据库中取出键的值
 val = lookupKey(db,key);
 ```
 
@@ -117,7 +117,9 @@ if (fe->mask & mask & AE_WRITABLE) {
     if (!rfired || fe->wfileProc != fe->rfileProc)
         fe->wfileProc(eventLoop,fd,fe->clientData,mask);
 }
+```
 wfileProc具体执行的是：
+```c
 /*
  * 负责传送命令回复的写处理器
  */
