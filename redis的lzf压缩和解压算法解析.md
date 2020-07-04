@@ -40,7 +40,7 @@ lzf_decompress (const void *const in_data,  unsigned int in_len,
 
 ###################华丽的分界线，以下进入具体实现####################
 
-******************压缩********************
+###******************压缩********************
 
 部分定义：
 ```c
@@ -113,62 +113,40 @@ else{
 
 我们观察一下op里面的内容
 
+```c
 开始空一个字节，这时：
-
 op = 0
-
 继续读取6个字节
-
 op = 0 h e l l o w o r l d x（中间的空格便于观察）
-
 读取到第12个字节的时候，发现有相同的内容（这里我把官方代码：&& ref > (u8 *)in_data 的 ">" 修改成了 “>=”）
-
 记录读取内容
-
 op = 10 h e l l o w o r l d x 
-
 记录偏移距离和重复长度
-
 op = 10 h e l l o w o r l d x 224 1 10
-
 继续空一个字节
-
 op = 10 h e l l o w o r l d x 224 1 10 0
-
 继续读取y
-
 op = 10 h e l l o w o r l d x 224 1 10 0 y （y前面一个0不需要修改成1，因为解压会做一次++）
-
 继续读取又碰到重复的内容
-
 op = 10 h e l l o w o r l d x 224 1 10 0 y 224 1 10
-
 继续空一个字节
-
 op = 10 h e l l o w o r l d x 224 1 10 0 y 224 1 10 0
-
 继续读取后面的fancie
-
 op = 10 h e l l o w o r l d x 224 1 10 0 y 224 1 10 0 f a n c i e
-
 记录最后一次读取长度
-
 op = 10 h e l l o w o r l d x 224 1 10 0 y 224 1 10 5 f a n c i e
-
 ####压缩到此结束
+```
 
 整个字符串压缩到27个字节
 
+```c
 程序输出：
-
 压缩前：val = helloworldxhelloworldyhelloworldfancie
-
 压缩前：len = 38
-
 压缩后：val = helloworldx....（后面有乱码）
-
 压缩后：len = 27
-
+```
 压缩过程还有许多具体处理细节，这里并没有写的太详细。
 
 
@@ -190,16 +168,13 @@ if (ctrl < (1 << 5)){
 }
 ```
 压缩过程我就不列出具体内容了。
-
+```c
 程序输出：
-
 解压前：val = helloworldx....（后面有乱码）
-
 解压前：len = 27
-
 解压后：val = helloworldxhelloworldyhelloworldfancie
-
 解压后：len = 38
+```
 
 -------------------------------------------------------------
 2020年7月2日整理于杭州
