@@ -75,7 +75,7 @@ if (dictSize(d) == 0) continue;
 di = dictGetSafeIterator(d);
 
 然后通过迭代器遍历所有的dictEntry，把key和value写入到文件。
-<span style="color: green">
+```
 //这里的sds是char *的一个扩转，兼容C语言原始的char *，同时记录字节长度，扩转了很多方法，例如字符串拼接。
 sds keystr = dictGetKey(de);    
 //robj是redis定义的结构体，兼容redis使用的各种类型，例如REDIS_STRING，REDIS_LIST，REDIS_SET，REDIS_ZSET，REDIS_HASH。
@@ -87,7 +87,7 @@ initStaticStringObject(key,keystr);
 expire = getExpire(db,&key);
 // 保存键值对数据
 if (rdbSaveKeyValuePair(&rdb,&key,o,expire,now) == -1) goto werr;
-</span> 
+```
 
 
 -------------------------------------------------------------
