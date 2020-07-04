@@ -3,7 +3,7 @@
 redis的save指令是把当前内存的内容以一定的格式写入文件，redis可以通过load文件重新读取内容加载到内存，不至于数据丢失，save指令是阻塞的（我们可以
 通过测试发现save不执行完，其他指令例如get是无法执行的），相对save的还有bgsave指令，后期我也将介绍bgsave指令是怎么执行的。
 
-save指令实行的是以下方法：
+save指令执行的是以下方法：
 ```c
 /* Save the DB on disk. Return REDIS_ERR on error, REDIS_OK on success 
  *
@@ -13,19 +13,19 @@ save指令实行的是以下方法：
  */
 int rdbSave(char *filename)
 ```
-方法开始做一些常规操作，比如创建文件，初始化IO这样的操作。
+方法开始做一些常规操作，比如创建文件，初始化IO这样的操作，接着设置校验函数。
 ```c
 // 设置校验和函数
 if (server.rdb_checksum)
     rdb.update_cksum = rioGenericUpdateChecksum;
 ```
-校验函数是指所有内容用一个算法计算出一个结果，redis这里会计算出一个8个字节的校验和，这里有点像MD5，把整个文件内容生成一个MD5值，我有时间会整理校验函数的实现。
+校验函数是指所有内容用一个算法计算出一个结果，redis这里会计算出一个8个字节的校验和，这里有点像MD5，把整个文件内容生成一个MD5值，文章底部有校验函数相关内容。
 
 写入版本号，这里用REDIS0006表示（redis3.0是0006）
 
-接下来是循环下入每个redis数据库，redis默认创建了16个数据库，如果不指定选择哪个数据库，系统采用0号数据库保存内容。
+接下来是循环进入每个redis数据库（redis默认创建了16个数据库，我们在使用redis的时候如果不指定选择哪个数据库，系统采用0号数据库保存内容）。
 
-具体怎么写入数据库，我们后面介绍，我们来看没有任何数据的情况。
+具体怎么写入数据库，我们后面介绍，我们先略过这个部分，看看无数据的情况还做了哪些事情。
 
 接下来写入结束标记
 ```c
@@ -51,11 +51,11 @@ rioWrite(&rdb,&cksum,8);
 
 前面9个字节代表rdb文件的redis版本号：redis0006
 
-接下来一个字节是337，代表数据库的结束标记
+接下来的“337”，代表数据库的结束标记
 
 后面8个字节是校验和，校验和是读取的时候用于计算数据库内容有没有被修改或者数据内容是否完整。
 
-我们另外看一个情况，当我们执行 set key value的时候rdb内容是什么样的。
+我们另外看一下有数据的情况，当我们执行“set key value”之后rdb内容是什么样的。
 
 继续执行od -c dump.rdb指令，获得如下内容：
 ```c
@@ -69,18 +69,19 @@ rioWrite(&rdb,&cksum,8);
 ```c
 if (rdbSaveType(&rdb,REDIS_RDB_OPCODE_SELECTDB) == -1) goto werr;
 ```
-\0：表示选择了0号数据库
+“\0”：表示选择了0号数据库
 
-\0 003 k e y 005 v a l u e，这个我们分解来看
+“\0 003 k e y 005 v a l u e”，这个我们分解来看
 
-  最前面的0表示数据类型，这是表示value的类型为“REDIS_RDB_TYPE_STRING”类型，它与内存数据的类型“REDIS_STRING”相对应。
+  “\0”：表示数据类型，这是表示value的类型为“REDIS_RDB_TYPE_STRING”类型，它与内存数据的类型“REDIS_STRING”相对应。
   
-  003 表示接下来的（k，v）的key需要读取3个字节。
+  “003”：表示接下来的（k，v）的key需要读取3个字节。
   
-  k e y：表示（k，v）的k的具体值。
+  “k e y”：表示（k，v）的k的具体值。
   
-  005表示“REDIS_RDB_TYPE_STRING”类型的value需要读取5个字节，这里表示为字符串，也就是“value”。
+  “005”：表示“REDIS_RDB_TYPE_STRING”类型的value需要读取5个字节，这里表示为字符串，也就是“value”。
   
+  “value”：就是（k，v）的v的具体值。
 
 ############华丽的分界线############################################################
 
@@ -111,11 +112,11 @@ expire = getExpire(db,&key);
 // 保存键值对数据
 if (rdbSaveKeyValuePair(&rdb,&key,o,expire,now) == -1) goto werr;
 ```
-save指令不保存过期的，所以先检查过期时间
+save指令不保存过期的数据，所以先检查过期时间
 
 具体保存key，value的部分在“rdbSaveKeyValuePair”方法里面，接下来我们看“rdbSaveKeyValuePair”这个方法。
 
-核心代码在这里
+核心代码在这里：
 ```c
 /* Save type, key, value 
 *
@@ -127,7 +128,7 @@ if (rdbSaveObject(rdb,val) == -1) return -1;
 ```
 从代码我们可以看到首先保存value的类型，再保存string类型的key，最后保存value对象。
 
-rdbSaveObjectType方法比较简单，就是od指令里面“003”前面的数字，每个数字代表一种类型。
+rdbSaveObjectType方法比较简单，就是od指令里面“003”之前的“\0”，每个数字代表一种数据类型。
 
 本次我们只解析string类型的内容如何保存到rdb中，所以保存key和value使用的是同样的方法。
 ```c
@@ -148,7 +149,7 @@ int rdbSaveRawString(rio *rdb, unsigned char *s, size_t len){
 
 这跟我们用od命令观察的结果是一样的，比如：003 k e y 005 v a l u e。
 
-首先看数据是否可以进行整数编码，整数编码可以更节省空间，例如：”set k1 125“这样的数据，如果保存为字符串需要3个字节，对数据进行整数编码之后只有1个字节。
+首先看数据是否可以进行整数编码，整数编码可以更节省空间，例如：”set k1 125“这样的数据，value部分如果保存为字符串需要3个字节“1 2 5”，当系统对数据进行整数编码之后只有1个字节。
 ```c
 /* Try integer encoding 
  *
@@ -164,7 +165,7 @@ if (len <= 11) {
     }
 }
 ```
-如果不能进行整数编码，然后会尝试对数据进行压缩，压缩的算法可以参考：<<第一篇：redis的lzf压缩和解压算法解析>>，如果压缩成功，将会保存一个压缩标记，具体实现：
+如果不能进行整数编码，然后会尝试对数据进行压缩，压缩的算法可以参考：<<第一篇：redis的lzf压缩和解压算法解析>>，如果压缩成功，将会保存一个压缩标记和压缩之前和之后的长度，具体实现：
 ```c
 // 写入类型，说明这是一个 LZF 压缩字符串
 byte = (REDIS_RDB_ENCVAL<<6)|REDIS_RDB_ENC_LZF;
@@ -183,7 +184,7 @@ nwritten += n;
 if ((n = rdbWriteRaw(rdb,out,comprlen)) == -1) goto writeerr;
 nwritten += n;
 ```
-如果数据既不能整数编码也不能被压缩，那写入长度和内容。
+如果数据既不能整数编码也不能被压缩，那直接写入长度和内容。
 ```c
 // 写入长度
 if ((n = rdbSaveLen(rdb,len)) == -1) return -1;
