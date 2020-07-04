@@ -12,4 +12,4 @@
 
 第五篇：redis的save指令执行的过程以及rdb文件具体存储的内容。
 
-第五篇：redis的通用HASH函数算法解析。
+第六篇：redis的通用HASH函数算法解析。
