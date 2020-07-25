@@ -104,6 +104,8 @@ static int aeApiPoll(aeEventLoop *eventLoop, struct timeval *tvp) {
 ```
 这涉及到内核的多路复用，内核维护一个事件处理队列，如果队列中的事件有新的事件要处理，则通过kevent返回给redis进程，redis根据内核的事件fd判断是哪个客户端的消息，然后把结果返回给相应的客户端，所以aeApiPoll核心代码主要是kevent(state->kqfd, NULL, 0, state->events, eventLoop->setsize,&timeout)，如果有待处理的事件，就把这些事件放置到eventLoop->fired中，接下来通过循环eventLoop->fired分别处理相应的请求。
 
+案例
+----
 为了便于连接多路复用和事件队列，我从网上找了一个客户端和服务器通信的案例，实际上redis跟这个类似，案例包括server和client两个部分。
 
 server：
