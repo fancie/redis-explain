@@ -26,7 +26,7 @@ int aeProcessEvents(aeEventLoop *eventLoop, int flags)
 ```
 aeProcessEvents处理所有的事件，包括文件事件和时间事件，文件事件具体指从客户端收到的所有指令，例如get/set等，时间事件是redis内部处理一些必要的操作，例如主动清除过期键，更新统计信息等，具体函数是redis.c/serverCron方法。
 
-本次文档主要介绍文件事件，时间事件请看《redis的时间事件做了一些什么事情》。
+本次文档主要介绍文件事件，时间事件请看《redis的时间事件的执行过程和工作内容》。
 
 首先redis在启动的时候初始化事件，redis初始化的时候维护了一个10000+的事件队列，并生成一个内核事件队列：kqueue()。（我用的是mac调试的，使用的是kqueue，实际上redis还提供另外3种方式：select、evport、epoll）。
 ```c
