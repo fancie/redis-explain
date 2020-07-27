@@ -49,6 +49,9 @@ void loadDataFromDisk(void) {
 
 讲到这里的时候，redis接下来的启动与aof无关了，接下来我们看写入的情况。
 
+写入
+---
+
 当我们敲入“set key value”的时候，按照AOF的同步逻辑，数据应该按照每秒一次的形式写入aof文件，实际上这个过程是在“call”函数中完成的，“call”函数是redis的核心函数，负责执行客户端的命令，call函数有如下代码，负责把命令广播到AOF或者slave中。
 ```c
 // 将命令复制到 AOF 和 slave 节点
@@ -124,6 +127,9 @@ void flushAppendOnlyFile(int force){
 }
 ```
 实际上“flushAppendOnlyFile”函数体很大，做了很多事情，例如：写入的出现异常把异常内容移除等，这些内容读者可以自行研究。
+
+读取
+---
 
 现在我们回过头来读取的情况，读取是在“loadAppendOnlyFile(char *filename)”函数里面，核心内容如下：
 ```c
