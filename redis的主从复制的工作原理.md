@@ -56,7 +56,7 @@ int connectWithMaster(void) {
 
 我们看看服务器打印日志：
 ```c
-Slaveri日志：
+Slave日志：
 [1572] 09 Aug 23:39:51.520 * Connecting to MASTER 127.0.0.1:6379
 [1572] 09 Aug 23:39:51.520 # 调用connectWithMaster函数
 [1572] 09 Aug 23:39:53.242 * MASTER <-> SLAVE sync started
